@@ -10,24 +10,22 @@ import (
 )
 
 func main() {
-	counts := make(map[string]int)
+	stdinCounts := make(map[string]int)
 	files := os.Args[1: ]
 	if len(files) == 0 {
-		countLines(os.Stdin, counts)
+		countLines(os.Stdin, stdinCounts)
+		printLines("Stdin", stdinCounts)
 	} else {
 		for _, arg := range files {
 			f, err := os.Open(arg)
+			fileCounts := make(map[string]int)    // every time refresh map
 			if err != nil {
 				fmt.Fprintf(os.Stderr, "dup2: %v\n", err)
 				continue
 			}
-			countLines(f, counts)
+			countLines(f, fileCounts)
+			printLines(arg, fileCounts)
 			f.Close()
-		}
-	}
-	for line, n := range counts {
-		if n > 1 {
-			fmt.Printf("%d\t%s\n", n, line)
 		}
 	}
 }
@@ -38,4 +36,17 @@ func countLines(f *os.File, counts map[string]int) {
 		counts[input.Text()]++
 	}
 	// NOTE: ignoring potential errors from input.Err()
+}
+
+func printLines(arg string, counts map[string]int) {
+	i := false
+	for line, n := range counts {
+		if n > 1 {
+			if arg != "Stdin" && i == false {
+				fmt.Printf("\n%s:\n", arg)    // print file name
+			    i = true;
+			}
+			fmt.Printf("%d\t%s\n", n, line)
+		}
+	}
 }
