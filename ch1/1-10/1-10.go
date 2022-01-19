@@ -20,10 +20,15 @@ func main() {
 	for _, url := range os.Args[1:] {
 		go fetch(url, ch) // start a goroutine
 	}
+	const filename = "result"
+	f, _ := os.Open(filename)
 	for range os.Args[1:] {
-		fmt.Println(<-ch) // receive from channel ch
+		//fmt.Println(<-ch) // receive from channel ch
+		fmt.Fprintf(f, "%s\n", <-ch)
 	}
-	fmt.Printf("%.2fs elapsed\n", time.Since(start).Seconds())
+	//fmt.Printf("%.2fs elapsed\n", time.Since(start).Seconds())
+	fmt.Fprintf(f, "%.2fs elapsed\n", time.Since(start).Seconds())
+	f.Close()
 }
 
 func fetch(url string, ch chan<- string) {
